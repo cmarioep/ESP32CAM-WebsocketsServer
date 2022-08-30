@@ -11,6 +11,9 @@ httpServer.listen(HTTP_PORT, () => {
 }
 );
 
+httpServer.get('/', (req, res) => {
+    res.send('Hello World!');
+  });
 
 const wsServer = new WebSocket.Server({ port: WS_PORT }, () => {
     console.log(`WebSocket Server is listening at ${WS_PORT}`)
@@ -35,3 +38,4 @@ wsServer.on('connection', (ws, req) => {
     });
 
 });
+
