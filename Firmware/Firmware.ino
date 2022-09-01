@@ -9,7 +9,7 @@
 const char* ssid = "HOME-2308";
 const char* password = "E55D1F3841AB3317";
 
-const char* ws_host = "192.168.1.61";
+const char* ws_host = "50.17.205.165";
 const uint16_t ws_port = 8888;
 
 using namespace websockets;
