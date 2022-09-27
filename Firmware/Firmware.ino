@@ -6,11 +6,11 @@
 #define CAMERA_MODEL_AI_THINKER // Has PSRAM
 #include "camera_pins.h"
 
-const char* ssid = "HOME-2308";
-const char* password = "E55D1F3841AB3317";
+const char* ssid = "TIGO0D4549";
+const char* password = "S766Z9ZR";
 
-const char* ws_host = "50.17.205.165";
-const uint16_t ws_port = 8888;
+const char* ws_host = "192.168.1.11";
+const uint16_t ws_port = 8080;
 
 using namespace websockets;
 WebsocketsClient client;
@@ -47,7 +47,7 @@ void setup() {
   //                      for larger pre-allocated frame buffer.
   if(psramFound()){
     config.frame_size = FRAMESIZE_VGA;
-    config.jpeg_quality = 40;
+    config.jpeg_quality = 30;
     config.fb_count = 2;
   } else {
     config.frame_size = FRAMESIZE_SVGA;
