@@ -9,16 +9,35 @@
 const char* ssid = "TIGO0D4549";
 const char* password = "S766Z9ZR";
 
-const char* ws_host = "192.168.1.11";
-const uint16_t ws_port = 8080;
+const char* websocket_server_host = "192.168.1.11";
+const uint16_t websocket_server_port = 8080;
 
 using namespace websockets;
 WebsocketsClient client;
+bool isWebSocketConnected;
+
+  void webSocketConnect(){
+    while(!client.connect(websocket_server_host, websocket_server_port, "/")){
+      delay(500);
+      Serial.print(".");    
+    } 
+  }
+
+void onEventsCallback(WebsocketsEvent event, String data){
+  if(event == WebsocketsEvent::ConnectionOpened){
+    Serial.println("Connection Opened");
+    isWebSocketConnected = true;
+  }else if(event == WebsocketsEvent::ConnectionClosed){
+    Serial.println("Connection Closed");
+    isWebSocketConnected = false;
+    webSocketConnect();
+  }
+}
 
 
 void setup() {
+  isWebSocketConnected = false;
   Serial.begin(115200);
-  Serial.setDebugOutput(true);
   Serial.println();
 
   camera_config_t config;
@@ -42,19 +61,10 @@ void setup() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 10000000;
   config.pixel_format = PIXFORMAT_JPEG;
+  config.frame_size = FRAMESIZE_VGA;
+  config.jpeg_quality = 30;
+  config.fb_count = 2;
   
-  // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
-  //                      for larger pre-allocated frame buffer.
-  if(psramFound()){
-    config.frame_size = FRAMESIZE_VGA;
-    config.jpeg_quality = 30;
-    config.fb_count = 2;
-  } else {
-    config.frame_size = FRAMESIZE_SVGA;
-    config.jpeg_quality = 12;
-    config.fb_count = 1;
-  }
-
 
   // camera init
   esp_err_t err = esp_camera_init(&config);
@@ -64,7 +74,7 @@ void setup() {
   }
 
   WiFi.begin(ssid, password);
-
+  Serial.println("Wifi conection");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -73,20 +83,22 @@ void setup() {
   Serial.println("");
   Serial.println("WiFi connected");
 
-  Serial.print("Camera Ready! Use 'http://");
-  Serial.print(WiFi.localIP());
-  Serial.println("' to connect");
+  client.onEvent(onEventsCallback);
 
-  while(!client.connect(ws_host, ws_port, "/")){
-    delay(500);
-    Serial.print(".");
-  }
-  
+  webSocketConnect(); 
   Serial.println("Websocket Connected!");
-
+  
 }
 
+
 void loop() {
+  
+  if(client.available()){
+    client.poll();
+  }
+  
+  if(!isWebSocketConnected) return;
+  
   
   camera_fb_t *fb = esp_camera_fb_get();
   if(!fb){
